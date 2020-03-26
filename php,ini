@@ -1,0 +1,16 @@
+output_buffering = Off
+DefaultLanguage ja
+magic_quotes_gpc = Off
+
+default_charset = UTF-8
+
+extension_dir = C:/php/extensions
+
+extension=php_mbstring.dll
+mbstring.language = Japanese
+mbstring.internal_encoding = UTF-8
+mbstring.http_input  = auto
+mbstring.http_output = UTF-8
+mbstring.encoding_translation = On
+mbstring.detect_order = auto
+mbstring.substitute_character = none
