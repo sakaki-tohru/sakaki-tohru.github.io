@@ -1,13 +1,14 @@
 var canvas=document.getElementById("gameCanvas");
 var drawingMethod=canvas.getContext("2d");
 
+const CONNECT_NUM=5;
 const STONE_SIZE=40;
-const STAGE_SIZE=8;
+const STAGE_SIZE=6;
 const SQUARE_SIZE=100;
 const PLAYER_COLOR=1;
 const COM_COLOR=2;
 
-window.onload=function(){var opinion=dovument.getElementById("bottom").value=""};
+window.onload=function(){var opinion=document.getElementById("bottom").value=""};
 
 class Stone{
     constructor(x_,y_,color_){
@@ -16,9 +17,17 @@ class Stone{
         this.color=color_;
     }
     draw(){
+        if(this.color==0){
+            return;
+        }
         drawingMethod.beginPath();
+        if(this.color==1){
+            drawingMethod.fillStyle = 'rgb(255,255,255)';
+        }
+        else if(this.color==2){
+            drawingMethod.fillStyle = 'rgb(00,00,00)';
+        }
         drawingMethod.arc(this.x,this.y,STONE_SIZE,0,Math.PI*2);
-        drawingMethod.fillStyle=drawingMethod.createLinearGradient(0,0,SQUARE_SIZE*STAGE_SIZE,SQUARE_SIZE*STAGE_SIZE);
         drawingMethod.fill();
     }
 }
@@ -27,13 +36,19 @@ class Board{
     constructor(){
         this.turn=1;
         this.stones=[];
+        this.winner=0;
         for(var i=0;i<STAGE_SIZE;i++){
             this.stones[i]=[];
             for(var j=0;j<STAGE_SIZE;j++){
                 this.stones[i][j]=new Stone(SQUARE_SIZE*i+SQUARE_SIZE/2,SQUARE_SIZE*j+SQUARE_SIZE/2,0);
             }
         }
-        //初期配置を後で決めてここに書く(本当にやるんですか？)
+        //初期配置をいい感じに決めてちょ
+        for(var i=2; i<=3;i++){
+            for(var j=2;j<=3;j++){
+                this.stones[i][j].color=(i+j+1)%2+1;
+            }
+        }
     }
 
     getBoard(){
@@ -50,27 +65,26 @@ class Board{
 
     draw(){
         drawingMethod.beginPath();
-        drawingMethod.rect(0,0,SQUARE_SIZE*STAGE_SIZE,SQUARE_SIZE*STAGE_SIZE);
-        drawingMethod.fill();
+        drawingMethod.fillStyle = 'rgb(00,100,70)';
+        drawingMethod.fillRect(0,0,SQUARE_SIZE*STAGE_SIZE,SQUARE_SIZE*STAGE_SIZE);
         for(var i=0;i<STAGE_SIZE;i++){
             for(var j=0;j<STAGE_SIZE;j++){
                 this.stones[i][j].draw();
             }
         }
-        for(var i=0;i<STAGE_SIZE+1;i++){
+        for(var i=0;i<=STAGE_SIZE;i++){
             drawingMethod.beginPath();
             drawingMethod.moveTo(0,i*SQUARE_SIZE);
             drawingMethod.lineTo(SQUARE_SIZE*STAGE_SIZE,i*SQUARE_SIZE);
             drawingMethod.stroke();
             drawingMethod.beginPath();
-            drawingMethod.mobeTo(i*SQUARE_SIZE,0);
+            drawingMethod.moveTo(i*SQUARE_SIZE,0);
             drawingMethod.lineTo(i*SQUARE_SIZE,SQUARE_SIZE*STAGE_SIZE);
             drawingMethod.stroke();
         }
     }
 
     turnChange(){
-        this.turn=this.turn%2+1;
         if(this.isFill()){
             this.gameOver();
             this.turn=0;
@@ -81,7 +95,64 @@ class Board{
             this.turn=0;
             return ;
         }
+        this.turn=this.turn%2+1;
         document.getElementById("top").innerHTML=["game over","Your turn","Com turn"][this.turn];
+    }
+    victory(){
+        var board=this.getBoard();
+        var fx=[1,0,1,1];
+        var fy=[0,1,1,-1];
+
+        for(var i=0;i<STAGE_SIZE;i++){
+            for(var j=0;j<STAGE_SIZE;j++){
+                for(var a=0;a<4;a++){
+                    var tmp=0;
+                    var col=board[i][j];
+                    for(var k=1;true;k++){
+                        var x=fx[a]*k+i;
+                        var y=fy[a]*k+j;
+                        if(x<0||x>=STAGE_SIZE||y<0||y>=STAGE_SIZE){
+                            break;
+                        }
+                        if(board[x][y]==0){
+                            break;
+                        }
+                        if(board[x][y]==col){
+                            tmp++;
+                        }
+                    }
+                    for(var k=-1;true;k--){
+                        var x=fx[a]*k+i;
+                        var y=fy[a]*k+j;
+                        if(x<0||x>=STAGE_SIZE||y<0||y>=STAGE_SIZE){
+                            break;
+                        }
+                        if(board[x][y]==0){
+                            break;
+                        }
+                        if(board[x][y]==col){
+                            tmp++;
+                        }
+                    }
+                    if(tmp>=CONNECT_NUM-1){
+                        this.winner=col;
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    gameEnd(){
+        var res="game end!!<div>winner = ";
+        if(this.winner==1){
+            res=res+"you!";
+        }
+        else if(this.winner==2){
+            res=res+"COM";
+        }
+        document.getElementById("top").innerHTML=res;
     }
 
     gameOver(){
@@ -98,15 +169,22 @@ class Board{
                 }
             }
         }
-
-        document.getElementById("top").innerHTML="game over<div>Player = "+PLAYER_COLOR.toString()+"<div>COM = "+Comment.toString();
+        var res="game over<div>winner = ";
+        if(this.winner==1){
+            res=res+"you!";
+        }
+        else if(this.winner==2){
+            res=res+"COM";
+        }
+        res=res+"<div>your score is "+PLAYER_COLOR.toString()+"<div>COM score is = "+Comment.toString();
+        document.getElementById("top").innerHTML=res;
     }
 
     isFill(){
         var board=this.getBoard();
         for(var i=0;i<STAGE_SIZE;i++){
             for(var j=0;j<STAGE_SIZE;j++){
-                if(board[i][j].color==0){
+                if(board[i][j]==0){
                     return false;
                 }
             }
@@ -120,9 +198,10 @@ class Board{
             return false;
         }
         var reverseCoordinate=this.reverse(x,y,color);
-
-        for(var f of reverseCoordinate){
-            this.stones[f[0]][f[1]]=color;
+        if(reverseCoordinate.length>0){
+            for(var f of reverseCoordinate){
+                this.stones[f[0]][f[1]].color=color;
+            }
         }
         this.stones[x][y].color=color;
         return true;
@@ -141,8 +220,7 @@ class Board{
         for(var fx=-1;fx<=1;fx++){
             for(var fy=-1;fy<=1;fy++){
                 var tmp=[];
-                var i=0;
-                while(i++){
+                for(var i=1;true;i++){
                     if(fx*i+x<0||fx*i+x>=STAGE_SIZE||fy*i+y<0||fy*i+y>=STAGE_SIZE){
                         break;
                     }
@@ -150,7 +228,7 @@ class Board{
                         break;
                     }
                     if(board[fx*i+x][fy*i+y]==otherColor(color)){
-                        tmp.push([fx*i+x,dy*i+y]);
+                        tmp.push([fx*i+x,fy*i+y]);
                     }
                     if(board[fx*i+x][fy*i+y]==color){
                         for(var rev of tmp){
@@ -176,38 +254,38 @@ function otherColor(color){
 
 function Click(eve){
     var rect=eve.target.getBoundingClientRect();
-    var x=e.clientX-rect.left;
-    var y=e.clientY-rect.top;
-    if(game.put(~~(x/SQUARE_SIZE),~~(y/SQUARE_SIZE),game.turn)){
-        game.nextturn();
+    var x=eve.clientX-rect.left;
+    var y=eve.clientY-rect.top;
+    if(game.putStone(~~(x/SQUARE_SIZE),~~(y/SQUARE_SIZE),PLAYER_COLOR)){
+        game.turnChange();
     }
     if(game.turn==COM_COLOR){
         com_action(game);
     }
 }
 
+//クソ雑魚AIやめてくださいちょっとｗ
 function com_action(board){
-    var field=board.getBoard();
     var max_score=0;
-    var x,y;
+    var x=0,y=0;
     for(var i=0;i<STAGE_SIZE;i++){
         for(var j=0;j<STAGE_SIZE;j++){
             var tmp=board.reverse(i,j,COM_COLOR);
-            if(tmp>max_score){
+            if(tmp>=max_score){
                 max_score=tmp;
                 x=i;
                 y=j;
             }
         }
     }
-    board.put(x,y,COM_COLOR);
-    board.nextturn();
+    board.putStone(x,y,COM_COLOR);
+    board.turnChange();
 }
 
 var game=new Board();
 
 function draw(){
-    frameElement.draw();
+    game.draw();
 }
 
 canvas.addEventListener('click',Click,false);
