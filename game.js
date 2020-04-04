@@ -2,7 +2,8 @@ var canvas=document.getElementById("gameCanvas");
 var drawingMethod=canvas.getContext("2d");
 
 const STONE_SIZE=40;
-const STAGE_SIZE=10;
+const STAGE_SIZE=8;
+const SQUARE_SIZE=100;
 const PLAYER_COLOR=1;
 const COM_COLOR=2;
 
@@ -17,7 +18,7 @@ class Stone{
     draw(){
         drawingMethod.beginPath();
         drawingMethod.arc(this.x,this.y,STONE_SIZE,0,Math.PI*2);
-        drawingMethod.fillStyle=drawingMethod.createLinearGradient(0,0,800,800);
+        drawingMethod.fillStyle=drawingMethod.createLinearGradient(0,0,SQUARE_SIZE*STAGE_SIZE,SQUARE_SIZE*STAGE_SIZE);
         drawingMethod.fill();
     }
 }
@@ -29,7 +30,7 @@ class Board{
         for(var i=0;i<STAGE_SIZE;i++){
             this.stones[i]=[];
             for(var j=0;j<STAGE_SIZE;j++){
-                this.stones[i][j]=new Stone(100*i+50,100*j+50,0);
+                this.stones[i][j]=new Stone(SQUARE_SIZE*i+SQUARE_SIZE/2,SQUARE_SIZE*j+SQUARE_SIZE/2,0);
             }
         }
         //初期配置を後で決めてここに書く(本当にやるんですか？)
@@ -49,7 +50,23 @@ class Board{
 
     draw(){
         drawingMethod.beginPath();
-        drawingMethod.rect(0,0,800,800);
+        drawingMethod.rect(0,0,SQUARE_SIZE*STAGE_SIZE,SQUARE_SIZE*STAGE_SIZE);
+        drawingMethod.fill();
+        for(var i=0;i<STAGE_SIZE;i++){
+            for(var j=0;j<STAGE_SIZE;j++){
+                this.stones[i][j].draw();
+            }
+        }
+        for(var i=0;i<STAGE_SIZE+1;i++){
+            drawingMethod.beginPath();
+            drawingMethod.moveTo(0,i*SQUARE_SIZE);
+            drawingMethod.lineTo(SQUARE_SIZE*STAGE_SIZE,i*SQUARE_SIZE);
+            drawingMethod.stroke();
+            drawingMethod.beginPath();
+            drawingMethod.mobeTo(i*SQUARE_SIZE,0);
+            drawingMethod.lineTo(i*SQUARE_SIZE,SQUARE_SIZE*STAGE_SIZE);
+            drawingMethod.stroke();
+        }
     }
 
     turnChange(){
@@ -156,3 +173,42 @@ function otherColor(color){
         return PLAYER_COLOR;
     }
 }
+
+function Click(eve){
+    var rect=eve.target.getBoundingClientRect();
+    var x=e.clientX-rect.left;
+    var y=e.clientY-rect.top;
+    if(game.put(~~(x/SQUARE_SIZE),~~(y/SQUARE_SIZE),game.turn)){
+        game.nextturn();
+    }
+    if(game.turn==COM_COLOR){
+        com_action(game);
+    }
+}
+
+function com_action(board){
+    var field=board.getBoard();
+    var max_score=0;
+    var x,y;
+    for(var i=0;i<STAGE_SIZE;i++){
+        for(var j=0;j<STAGE_SIZE;j++){
+            var tmp=board.reverse(i,j,COM_COLOR);
+            if(tmp>max_score){
+                max_score=tmp;
+                x=i;
+                y=j;
+            }
+        }
+    }
+    board.put(x,y,COM_COLOR);
+    board.nextturn();
+}
+
+var game=new Board();
+
+function draw(){
+    frameElement.draw();
+}
+
+canvas.addEventListener('click',Click,false);
+setInterval(draw,10);
