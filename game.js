@@ -169,12 +169,15 @@ class Board{
                 }
             }
         }
-        var res="game over<div>winner = ";
-        if(this.winner==1){
-            res=res+"you!";
+        var res="game over!<div>";
+        if(player>com){
+            res=res+"winner = you!";
         }
-        else if(this.winner==2){
-            res=res+"COM";
+        else if(player<com){
+            res=res+"winner = COM";
+        }
+        else{
+            res=res+"引き分け！"
         }
         res=res+"<div>your score is "+PLAYER_COLOR.toString()+"<div>COM score is = "+Comment.toString();
         document.getElementById("top").innerHTML=res;
