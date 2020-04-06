@@ -179,7 +179,7 @@ class Board{
         else{
             res=res+"引き分け！"
         }
-        res=res+"<div>your score is "+PLAYER_COLOR.toString()+"<div>COM score is = "+Comment.toString();
+        res=res+"<div>your score is "+player.toString()+"<div>COM score is = "+com.toString();
         document.getElementById("top").innerHTML=res;
     }
 
@@ -292,4 +292,4 @@ function draw(){
 }
 
 canvas.addEventListener('click',Click,false);
-setInterval(draw,10);
+setInterval(draw,1);
