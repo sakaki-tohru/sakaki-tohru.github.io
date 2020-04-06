@@ -270,6 +270,12 @@ function Click(events){
     }
 }
 
+function randomGenerator(min,max){
+    var rand=Math.floor(Math.random()*(max-min))+min;
+
+    return rand;
+}
+
 //クソ雑魚AIやめてくださいちょっとｗ
 function com_action(board){
     var max_score=0;
@@ -284,8 +290,16 @@ function com_action(board){
             }
         }
     }
-    board.putStone(x,y,COM_COLOR);
-    board.turnChange();
+    if(board.putStone(x,y,COM_COLOR)){
+        board.turnChange();
+    }
+    else{
+        while(!board.putStone(x,y,COM_COLOR)){
+            x=randomGenerator(0,STAGE_SIZE);
+            y=randomGenerator(0,STAGE_SIZE);
+        }
+        board.turnChange();
+    }
 }
 
 var game=new Board();
