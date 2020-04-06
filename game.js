@@ -255,10 +255,13 @@ function otherColor(color){
     }
 }
 
-function Click(eve){
-    var rect=eve.target.getBoundingClientRect();
-    var x=eve.clientX-rect.left;
-    var y=eve.clientY-rect.top;
+function Click(events){
+    var rect=events.target.getBoundingClientRect();
+    var x=events.clientX-rect.left;
+    var y=events.clientY-rect.top;
+    if(game.turn==0){
+        return;
+    }
     if(game.putStone(~~(x/SQUARE_SIZE),~~(y/SQUARE_SIZE),PLAYER_COLOR)){
         game.turnChange();
     }
