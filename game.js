@@ -8,7 +8,9 @@ const SQUARE_SIZE=100;
 const PLAYER_COLOR=1;
 const COM_COLOR=2;
 
-window.onload=function(){var opinion=document.getElementById("bottom").value=""};
+var tmp_x=0,tmp_y=0;
+
+//window.onload=function(){var opinion=document.getElementById("bottom").value=""};
 
 class Stone{
     constructor(x_,y_,color_){
@@ -44,8 +46,8 @@ class Board{
             }
         }
         //初期配置をいい感じに決めてちょ
-        for(var i=2; i<=3;i++){
-            for(var j=2;j<=3;j++){
+        for(var i=(STAGE_SIZE/2)-1; i<=STAGE_SIZE/2;i++){
+            for(var j=(STAGE_SIZE/2)-1;j<=STAGE_SIZE/2;j++){
                 this.stones[i][j].color=(i+j+1)%2+1;
             }
         }
@@ -290,6 +292,20 @@ function com_action(board){
             }
         }
     }
+
+    for(var i=0;i<STAGE_SIZE;i++){
+        for(var j=0;j<STAGE_SIZE;j++){
+            if(searchAllMoves(board,i,j,COM_COLOR)){
+                x=tmp_x;
+                y=tmp_y;
+                if(board.putStone(x,y,COM_COLOR)){
+                    board.turnChange();
+                    return;
+                }
+            }
+        }
+    }
+
     if(board.putStone(x,y,COM_COLOR)){
         board.turnChange();
     }
@@ -301,7 +317,62 @@ function com_action(board){
         board.turnChange();
     }
 }
+var field=new Board();
+function searchAllMoves(board,x,y,color){
+    console.log("aaa");
+    for(var i=0;i<STAGE_SIZE;i++){
+        for(var j=0;j<STAGE_SIZE;j++){
+            field.stones[i][j].x=board.stones[i][j].x;
+            field.stones[i][j].y=board.stones[i][j].y;
+            field.stones[i][j].color=board.stones[i][j].color;
+        }
+    }
+    if(field.putStone(x,y,color)){
+        if(field.victory()){
+            tmp_x=x;
+            tmp_y=y;
+            return true;
+        }
+        for(var i=0;i<STAGE_SIZE;i++){
+            for(var j=0;j<STAGE_SIZE;j++){
 
+                if(field.putStone(i,j,otherColor(color))){
+
+                    if(field.victory()){
+                        return false;
+                    }
+                }
+
+            }
+        }
+        for(var i=0;i<STAGE_SIZE;i++){
+            for(var j=0;j<STAGE_SIZE;j++){
+
+                if(field.putStone(i,j,otherColor(color))){
+
+                    if(field.victory()){
+                        return false;
+                    }
+                    else{
+                        for(var k=0;k<STAGE_SIZE;k++){
+                            for(var l=0;l<STAGE_SIZE;l++){
+                                if(field.putStone(i,j,color)){
+                                    if(field.victory()){
+                                        tmp_x=k;
+                                        tmp_y=l;
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+    return false;
+}
 var game=new Board();
 
 function draw(){
@@ -309,4 +380,4 @@ function draw(){
 }
 
 canvas.addEventListener('click',Click,false);
-setInterval(draw,1);
+setInterval(draw,20);
