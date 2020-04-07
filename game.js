@@ -1,12 +1,12 @@
 var canvas=document.getElementById("gameCanvas");
 var drawingMethod=canvas.getContext("2d");
 
-const CONNECT_NUM=5;
 const STONE_SIZE=40;
-const STAGE_SIZE=6;
+const STAGE_SIZE=8;
 const SQUARE_SIZE=100;
 const PLAYER_COLOR=1;
 const COM_COLOR=2;
+const CONNECT_NUM=STAGE_SIZE-1;
 
 var tmp_x=0,tmp_y=0;
 
@@ -319,7 +319,6 @@ function com_action(board){
 }
 var field=new Board();
 function searchAllMoves(board,x,y,color){
-    console.log("aaa");
     for(var i=0;i<STAGE_SIZE;i++){
         for(var j=0;j<STAGE_SIZE;j++){
             field.stones[i][j].x=board.stones[i][j].x;
