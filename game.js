@@ -2,7 +2,7 @@ var canvas=document.getElementById("gameCanvas");
 var drawingMethod=canvas.getContext("2d");
 
 const STONE_SIZE=40;
-const STAGE_SIZE=8;
+const STAGE_SIZE=6;
 const SQUARE_SIZE=100;
 const PLAYER_COLOR=1;
 const COM_COLOR=2;
