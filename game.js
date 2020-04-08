@@ -275,17 +275,18 @@ function Click(events){
     if(game.turn==0){
         return;
     }
-    if(game.turn==1){
-        if(game.putStone(~~(x/SQUARE_SIZE),~~(y/SQUARE_SIZE),PLAYER_COLOR)){
-            game.turnChange();
+    if(game.putStone(~~(x/SQUARE_SIZE),~~(y/SQUARE_SIZE),PLAYER_COLOR)){
+        game.turnChange();
+        if(game.turn==0){
+            return;
         }
     }
-    if(game.turn==COM_COLOR){
-        setTimeout(com_action,500,game);
-        game.turnChange();
+    setTimeout(com_action,500,game);
+    game.turnChange();
+    if(game.turn==0){
+        return;
     }
 }
-
 function randomGenerator(min,max){
     var rand=Math.floor(Math.random()*(max-min))+min;
 
@@ -296,7 +297,7 @@ function randomGenerator(min,max){
 function com_action(board){
 
     if(searchAllMoves1(board,COM_COLOR)){
-        //console.log("Yeah!!searchAllMoves1");
+        console.log("Yeah!!searchAllMoves1");
         x=tmp_x;
         y=tmp_y;
         if(board.putStone(x,y,COM_COLOR)){
@@ -304,14 +305,14 @@ function com_action(board){
         }
     }
     if(searchAllMoves2(board,COM_COLOR)){
-        //console.log("Yeah!!searchAllMoves2");
+        console.log("Yeah!!searchAllMoves2");
         x=tmp_x;
         y=tmp_y;
         if(board.putStone(x,y,COM_COLOR)){
             return;
         }
     }
-    //console.log("Yeah!! else");
+    console.log("Yeah!! else");
     var max_score=0;
     var x=0,y=0;
     for(var i=0;i<STAGE_SIZE;i++){
@@ -372,11 +373,13 @@ function searchAllMoves1(board,color){
 }
 
 function searchAllMoves2(board,color){
+    console.log("search 2 start");
     var field1=new Board();
     var check=false;
     for(var f=0;f<STAGE_SIZE;f++){
         for(var g=0;g<STAGE_SIZE;g++){
             setField(field1,board);
+            console.log("search 2 end");
             if(field1.putStone(f,g,color)){
                 if(field1.victory()){
                     tmp_x=f;
@@ -387,12 +390,12 @@ function searchAllMoves2(board,color){
                     return false;
                 }
                 else{
-                    var f=randomGenerator(1,3);
-                    if(board.reverse(f,g,color).length>0){
+                    var rand=randomGenerator(1,3);
+                    if(field1.reverse(f,g,color).length>0){
                         check=true;
                         tmp_x=f;
                         tmp_y=g;
-                        if(f==2){
+                        if(rand==2){
                             return true;
                         }
                     }
