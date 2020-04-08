@@ -10,8 +10,6 @@ const CONNECT_NUM=STAGE_SIZE-1;
 
 var tmp_x=0,tmp_y=0;
 
-//window.onload=function(){var opinion=document.getElementById("bottom").value=""};
-
 class Stone{
     constructor(x_,y_,color_){
         this.x=x_;
@@ -45,7 +43,7 @@ class Board{
                 this.stones[i][j]=new Stone(SQUARE_SIZE*i+SQUARE_SIZE/2,SQUARE_SIZE*j+SQUARE_SIZE/2,0);
             }
         }
-
+        //初期配置
         for(var i=(STAGE_SIZE/2)-1; i<=STAGE_SIZE/2;i++){
             for(var j=(STAGE_SIZE/2)-1;j<=STAGE_SIZE/2;j++){
                 this.stones[i][j].color=(i+j+1)%2+1;
@@ -94,11 +92,6 @@ class Board{
         }
         if(this.victory()){
             this.gameEnd();
-            for(var i=0;i<STAGE_SIZE;i++){
-                for(var j=0;j<STAGE_SIZE;j++){
-                    console.log(this.stones[i][j]);
-                }
-            }
             this.turn=0;
             return ;
         }
@@ -252,6 +245,19 @@ class Board{
 
         return res;
     }
+
+    countSpace(){
+        var field=this.getBoard();
+        var res=0;
+        for(var i=0;i<STAGE_SIZE;i++){
+            for(var j=0;j<STAGE_SIZE;j++){
+                if(field[i][j]==0){
+                    res++;
+                }
+            }
+        }
+        return res;
+    }
 }
 function otherColor(color){
     if(color==PLAYER_COLOR){
@@ -275,7 +281,7 @@ function Click(events){
         }
     }
     if(game.turn==COM_COLOR){
-        com_action(game);
+        setTimeout(com_action,500,game);
         game.turnChange();
     }
 }
@@ -288,26 +294,39 @@ function randomGenerator(min,max){
 
 //クソ雑魚AIやめてくださいちょっとｗ
 function com_action(board){
+
+    if(searchAllMoves1(board,COM_COLOR)){
+        //console.log("Yeah!!searchAllMoves1");
+        x=tmp_x;
+        y=tmp_y;
+        if(board.putStone(x,y,COM_COLOR)){
+            return;
+        }
+    }
+    if(searchAllMoves2(board,COM_COLOR)){
+        //console.log("Yeah!!searchAllMoves2");
+        x=tmp_x;
+        y=tmp_y;
+        if(board.putStone(x,y,COM_COLOR)){
+            return;
+        }
+    }
+    //console.log("Yeah!! else");
     var max_score=0;
     var x=0,y=0;
     for(var i=0;i<STAGE_SIZE;i++){
         for(var j=0;j<STAGE_SIZE;j++){
             var tmp=board.reverse(i,j,COM_COLOR);
             if(tmp.length>max_score){
-                max_score=tmp;
+                max_score=tmp.length;
                 x=i;
                 y=j;
             }
-        }
-    }
-
-    for(var i=0;i<STAGE_SIZE;i++){
-        for(var j=0;j<STAGE_SIZE;j++){
-            if(searchAllMoves(board,i,j,COM_COLOR)){
-                x=tmp_x;
-                y=tmp_y;
-                if(board.putStone(x,y,COM_COLOR)){
-                    return;
+            else if(tmp.length==max_score){
+                a=randomGenerator(1,4);
+                if(a==3){
+                    x=i;
+                    y=j;
                 }
             }
         }
@@ -335,64 +354,56 @@ function setField(field1,field2){
     }
 }
 
-var field1=new Board();
-var field2=new Board();
-var field3=new Board();
-
-function searchAllMoves(board,x,y,color){
+function searchAllMoves1(board,color){
+    var Field=new Board();
     for(var i=0;i<STAGE_SIZE;i++){
         for(var j=0;j<STAGE_SIZE;j++){
-            setField(field1,board);
-        }
-    }
-    if(field1.putStone(x,y,color)){
-        if(field1.victory()){
-            tmp_x=x;
-            tmp_y=y;
-            return true;
-        }
-        for(var i=0;i<STAGE_SIZE;i++){
-            for(var j=0;j<STAGE_SIZE;j++){
-
-                setField(field2,field1);
-                if(field2.putStone(i,j,otherColor(color))){
-
-                    if(field2.victory()){
-                        return false;
-                    }
+            setField(Field,board);
+            if(Field.putStone(i,j,color)){
+                if(Field.victory()){
+                    tmp_x=i;
+                    tmp_y=j;
+                    return true;
                 }
-
-            }
-        }
-        for(var i=0;i<STAGE_SIZE;i++){
-            for(var j=0;j<STAGE_SIZE;j++){
-                setField(field2,field1);
-                if(field2.putStone(i,j,otherColor(color))){
-
-                    if(field2.victory()){
-                        return false;
-                    }
-                    else{
-                        setField(field3,field2);
-                        for(var k=0;k<STAGE_SIZE;k++){
-                            for(var l=0;l<STAGE_SIZE;l++){
-                                if(field3.putStone(i,j,color)){
-                                    if(field3.victory()){
-                                        tmp_x=k;
-                                        tmp_y=l;
-                                        return true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
             }
         }
     }
     return false;
 }
+
+function searchAllMoves2(board,color){
+    var field1=new Board();
+    var check=false;
+    for(var f=0;f<STAGE_SIZE;f++){
+        for(var g=0;g<STAGE_SIZE;g++){
+            setField(field1,board);
+            if(field1.putStone(f,g,color)){
+                if(field1.victory()){
+                    tmp_x=f;
+                    tmp_y=g;
+                    return true;
+                }
+                if(searchAllMoves1(field1,PLAYER_COLOR)){
+                    return false;
+                }
+                else{
+                    var f=randomGenerator(1,3);
+                    if(board.reverse(f,g,color).length>0){
+                        check=true;
+                        tmp_x=f;
+                        tmp_y=g;
+                        if(f==2){
+                            return true;
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+    return false;
+}
+
 var game=new Board();
 
 function draw(){
