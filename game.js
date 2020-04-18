@@ -85,6 +85,9 @@ class Board{
     }
 
     turnChange(){
+        if(this.turn==0){
+            return ;
+        }
         if(this.isFill()){
             this.gameOver();
             this.turn=0;
@@ -99,7 +102,6 @@ class Board{
         document.getElementById("top").innerHTML=["game over","Your turn","Com turn"][this.turn];
     }
     victory(){
-        var board=this.getBoard();
         var fx=[1,0,1,1];
         var fy=[0,1,1,-1];
 
@@ -107,17 +109,17 @@ class Board{
             for(var j=0;j<STAGE_SIZE;j++){
                 for(var a=0;a<4;a++){
                     var tmp=0;
-                    var col=board[i][j];
+                    var col=this.stones[i][j].color;
                     for(var k=1;true;k++){
                         var x=fx[a]*k+i;
                         var y=fy[a]*k+j;
                         if(x<0||x>=STAGE_SIZE||y<0||y>=STAGE_SIZE){
                             break;
                         }
-                        if(board[x][y]==0||board[x][y]==otherColor(col)){
+                        if(this.stones[x][y].color==0||this.stones[x][y].color==otherColor(col)){
                             break;
                         }
-                        if(board[x][y]==col){
+                        if(this.stones[x][y].color==col){
                             tmp++;
                         }
                     }
@@ -127,10 +129,10 @@ class Board{
                         if(x<0||x>=STAGE_SIZE||y<0||y>=STAGE_SIZE){
                             break;
                         }
-                        if(board[x][y]==0||board[x][y]==otherColor(col)){
+                        if(this.stones[x][y].color==0||this.stones[x][y].color==otherColor(col)){
                             break;
                         }
-                        if(board[x][y]==col){
+                        if(this.stones[x][y].color==col){
                             tmp++;
                         }
                     }
@@ -275,18 +277,25 @@ function Click(events){
     if(game.turn==0){
         return;
     }
+    console.log("t1");
     if(game.putStone(~~(x/SQUARE_SIZE),~~(y/SQUARE_SIZE),PLAYER_COLOR)){
         game.turnChange();
         if(game.turn==0){
             return;
         }
     }
-    setTimeout(com_action,500,game);
-    game.turnChange();
-    if(game.turn==0){
+    else{
         return;
     }
+    com_action(game);
+    game.turnChange();
+    return ;
 }
+
+function try_com(){
+
+}
+
 function randomGenerator(min,max){
     var rand=Math.floor(Math.random()*(max-min))+min;
 
@@ -353,6 +362,7 @@ function setField(field1,field2){
             field1.stones[i][j].color=field2.stones[i][j].color;
         }
     }
+    return ;
 }
 
 function searchAllMoves1(board,color){
@@ -373,13 +383,11 @@ function searchAllMoves1(board,color){
 }
 
 function searchAllMoves2(board,color){
-    console.log("search 2 start");
     var field1=new Board();
     var check=false;
     for(var f=0;f<STAGE_SIZE;f++){
         for(var g=0;g<STAGE_SIZE;g++){
             setField(field1,board);
-            console.log("search 2 end");
             if(field1.putStone(f,g,color)){
                 if(field1.victory()){
                     tmp_x=f;
@@ -411,7 +419,8 @@ var game=new Board();
 
 function draw(){
     game.draw();
+    return ;
 }
 
 canvas.addEventListener('click',Click,false);
-setInterval(draw,20);
+setInterval(draw,30);
