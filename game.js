@@ -277,8 +277,10 @@ function Click(events){
     if(game.turn==0){
         return;
     }
-    console.log("t1");
-    if(game.putStone(~~(x/SQUARE_SIZE),~~(y/SQUARE_SIZE),PLAYER_COLOR)){
+    var X=~~(x/SQUARE_SIZE);
+    var Y=~~(y/SQUARE_SIZE);
+    if(X>STAGE_SIZE||Y>STAGE_SIZE){return;}
+    if(game.putStone(X,Y,PLAYER_COLOR)){
         game.turnChange();
         if(game.turn==0){
             return;
