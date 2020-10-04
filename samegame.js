@@ -16,6 +16,8 @@ var countR=0;
 var countG=0;
 var countB=0;
 
+//1ターン戻るを実装せよ。
+
 class Stone{
     constructor(x_,y_,color_){
         this.x=x_;
