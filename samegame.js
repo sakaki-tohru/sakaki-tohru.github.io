@@ -1,7 +1,6 @@
 var canvas=document.getElementById("gameCanvas");
 var drawingMethod=canvas.getContext("2d");
 
-
 const STAGE_SIZE_HEIGHT=35;
 const STAGE_SIZE_WEIGHT=25;
 const SQUARE_SIZE=25;
@@ -68,6 +67,7 @@ class Board{
                 }
             }
         }
+        this.drawAlways();
         document.getElementById("top").innerHTML="your score is "+score+"<div> 赤:"+countR+" 緑:"+countG+" 青:"+countB;
     }
 
@@ -275,6 +275,7 @@ class Board{
             }
         }
     }
+    
 }
 
 function Click(events){
@@ -294,16 +295,8 @@ function Click(events){
 
 function randomGenerator(min,max){
     var rand=Math.floor(Math.random()*(max-min))+min;
-
     return rand;
 }
 
 var game=new Board();
-
-function draw(){
-    game.drawAlways();
-    return ;
-}
-
 canvas.addEventListener('click',Click,false);
-setInterval(draw,100);
