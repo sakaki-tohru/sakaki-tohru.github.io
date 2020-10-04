@@ -68,7 +68,7 @@ class Board{
                 }
             }
         }
-        document.getElementById("top").innerHTML="this is SAME GAME.<div>your score is "+score+"<div> 赤:"+countR+" 緑:"+countG+" 青:"+countB;
+        document.getElementById("top").innerHTML="your score is "+score+"<div> 赤:"+countR+" 緑:"+countG+" 青:"+countB;
     }
 
     getBoard(){
@@ -82,16 +82,10 @@ class Board{
 
         return res;
     }
-
-    draw(){
+    drawAlways(){
         drawingMethod.beginPath();
         drawingMethod.fillStyle = 'rgb(175,220,255)';
         drawingMethod.fillRect(0,0,SQUARE_SIZE*STAGE_SIZE_HEIGHT,SQUARE_SIZE*STAGE_SIZE_WEIGHT);
-        for(var i=0;i<STAGE_SIZE_HEIGHT;i++){
-            for(var j=0;j<STAGE_SIZE_WEIGHT;j++){
-                this.stones[i][j].draw();
-            }
-        }
         for(var i=0;i<=STAGE_SIZE_WEIGHT;i++){
             drawingMethod.beginPath();
             drawingMethod.moveTo(0,i*SQUARE_SIZE);
@@ -103,24 +97,32 @@ class Board{
             drawingMethod.moveTo(i*SQUARE_SIZE,0);
             drawingMethod.lineTo(i*SQUARE_SIZE,SQUARE_SIZE*STAGE_SIZE_WEIGHT);
             drawingMethod.stroke();
+        }        
+        for(var i=0;i<STAGE_SIZE_HEIGHT;i++){
+            for(var j=0;j<STAGE_SIZE_WEIGHT;j++){
+                this.stones[i][j].draw();
+            }
         }
     }
 
     turnChange(){
+        this.drawAlways();
         //ゲーム終了状態
         if(this.turn==0){
             return ;
         }
-        //消せるものがない
-        if(this.isNotErase()){
-            this.gameOver();
-            this.turn=0;
-            return ;
-        }
         //全て消した
         if(this.victory()){
-            score+=(STAGE_SIZE_HEIGHT*STAGE_SIZE_WEIGHT)*(STAGE_SIZE_HEIGHT*STAGE_SIZE_WEIGHT);
+            console.log("your win!");
+            score+=100000;
             this.gameEnd();
+            this.turn=0;
+            return ;
+        }        
+        //消せるものがない
+        if(this.isNotErase()){
+            console.log("your lose!");
+            this.gameOver();
             this.turn=0;
             return ;
         }
@@ -299,7 +301,7 @@ function randomGenerator(min,max){
 var game=new Board();
 
 function draw(){
-    game.draw();
+    game.drawAlways();
     return ;
 }
 
